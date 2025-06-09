@@ -25,7 +25,6 @@ class HomeActivity : AppCompatActivity() {
 
             Log.d("Hello","Hello")
             
-
             when (it.itemId) {
                 R.id.nav_watchList -> loadFragment(Watchlist())
                 R.id.nav_chart -> loadFragment(ChartFragment())
