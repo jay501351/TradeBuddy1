@@ -22,7 +22,7 @@ class HomeActivity : AppCompatActivity() {
         loadFragment(Watchlist())
         bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.nav_watchList ->loadFragment(Watchlist())
+                R.id.nav_watchList -> loadFragment(Watchlist())
                 R.id.nav_chart -> loadFragment(ChartFragment())
                 R.id.nav_explore -> loadFragment(ExploreFragment())
                 R.id.nav_menu -> loadFragment(MenuFragment())
