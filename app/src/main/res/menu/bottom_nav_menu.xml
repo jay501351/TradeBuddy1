@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav_watchList"
+        android:icon="@drawable/watchlist"
+        android:title="@string/watchlist"/>
+    <item
+        android:id="@+id/nav_chart"
+        android:icon="@drawable/chart"
+        android:title="@string/chart"/>
+    <item
+        android:id="@+id/nav_explore"
+        android:icon="@drawable/explore"
+        android:title="@string/explore"/>
+    <item
+        android:id="@+id/nav_menu"
+        android:icon="@drawable/menu"
+        android:title="@string/menu"/>
+</menu>
