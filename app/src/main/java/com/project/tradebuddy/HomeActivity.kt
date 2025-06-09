@@ -1,6 +1,7 @@
 package com.project.tradebuddy
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +22,10 @@ class HomeActivity : AppCompatActivity() {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
         loadFragment(Watchlist())
         bottomNav.setOnItemSelectedListener {
+
+            Log.d("Hello","Hello")
+            
+
             when (it.itemId) {
                 R.id.nav_watchList -> loadFragment(Watchlist())
                 R.id.nav_chart -> loadFragment(ChartFragment())
