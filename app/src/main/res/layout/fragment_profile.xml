@@ -13,7 +13,8 @@
         android:layout_height="wrap_content"
         android:text="@string/profile"
         android:textSize="24sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"/>
 
     <View
         android:layout_width="match_parent"

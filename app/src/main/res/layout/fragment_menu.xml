@@ -41,15 +41,6 @@
             android:textSize="16dp"/>
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/menu_notification"
-            android:text="@string/notification"
-            android:padding="16dp"
-            android:background="?attr/selectableItemBackground"
-            android:textSize="16dp"/>
-
-        <TextView
             android:id="@+id/menu_settings"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

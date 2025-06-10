@@ -45,11 +45,6 @@ class MenuFragment : Fragment() {
                 .commit()
         }
 
-        binding.menuNotification.setOnClickListener {
-            Toast.makeText(requireContext(), "Notification clicked", Toast.LENGTH_SHORT).show()
-            // TODO: startActivity(Intent(requireContext(), NotificationActivity::class.java))
-        }
-
         binding.menuSettings.setOnClickListener {
             Toast.makeText(requireContext(), "Settings clicked", Toast.LENGTH_SHORT).show()
             // TODO: startActivity(Intent(requireContext(), SettingsActivity::class.java))
