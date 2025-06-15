@@ -1,5 +1,6 @@
 package com.project.tradebuddy
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
@@ -8,6 +9,7 @@ import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
+import androidx.appcompat.app.AppCompatDelegate
 
 class SplashActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
@@ -15,6 +17,13 @@ class SplashActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        val sharedPref = getSharedPreferences("Settings", Context.MODE_PRIVATE)
+        val isDarkMode = sharedPref.getBoolean("dark_mode", false)
+
+        AppCompatDelegate.setDefaultNightMode(
+            if(isDarkMode) AppCompatDelegate.MODE_NIGHT_YES
+            else AppCompatDelegate.MODE_NIGHT_NO
+        )
         setContentView(R.layout.activity_splash)
 
         // Start your animation

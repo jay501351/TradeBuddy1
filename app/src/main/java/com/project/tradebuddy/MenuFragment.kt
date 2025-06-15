@@ -46,8 +46,10 @@ class MenuFragment : Fragment() {
         }
 
         binding.menuSettings.setOnClickListener {
-            Toast.makeText(requireContext(), "Settings clicked", Toast.LENGTH_SHORT).show()
-            // TODO: startActivity(Intent(requireContext(), SettingsActivity::class.java))
+            parentFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, SettingsFragment())
+                .addToBackStack(null)
+                .commit()
         }
 
         binding.menuAbout.setOnClickListener {
