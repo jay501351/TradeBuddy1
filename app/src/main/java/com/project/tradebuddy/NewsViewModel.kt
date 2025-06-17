@@ -6,7 +6,10 @@ import kotlinx.coroutines.launch
 class NewsViewModel : ViewModel() {
 
     private val _newsList = MutableLiveData<List<NewsItem>>()
-    val newsList: LiveData<List<NewsItem>> = _newsList
+    val newsList: LiveData<List<NewsItem>> get() = _newsList
+
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> get() = _error
 
     fun fetchNews(apiKey: String) {
         viewModelScope.launch {
@@ -14,9 +17,12 @@ class NewsViewModel : ViewModel() {
                 val response = RetrofitClient.instance.getFinancialNews(apiKey)
                 if (response.isSuccessful && response.body() != null) {
                     _newsList.postValue(response.body()!!.results)
+                    _error.value = null
+                }else{
+                    _error.value ="Error: ${response.code()}: ${response.message()}"
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                _error.value = "Failed to fetch news: ${e.message}"
             }
         }
     }
