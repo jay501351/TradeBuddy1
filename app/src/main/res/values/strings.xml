@@ -26,4 +26,6 @@
     <string name="name">Name</string>
     <string name="something_went_wrong">Something went wrong</string>
     <string name="retry">Retry</string>
+    <string name="hello_user">Hello, User</string>
+    <string name="logout">Logout</string>
 </resources>

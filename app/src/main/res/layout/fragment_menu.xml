@@ -25,10 +25,9 @@
             android:id="@+id/txtUserName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Hello, User"
+            android:text="@string/hello_user"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/text_primary"
             android:layout_marginBottom="10dp"/>
 
         <TextView
@@ -38,7 +37,7 @@
             android:text="@string/profile"
             android:padding="16dp"
             android:background="?attr/selectableItemBackground"
-            android:textSize="16dp"/>
+            android:textSize="16sp"/>
 
         <TextView
             android:id="@+id/menu_settings"
@@ -62,7 +61,7 @@
             android:id="@+id/menu_logout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Logout"
+            android:text="@string/logout"
             android:padding="16dp"
             android:background="?attr/selectableItemBackground"
             android:textSize="16sp"
