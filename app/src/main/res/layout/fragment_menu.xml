@@ -17,8 +17,8 @@
             android:layout_height="wrap_content"
             android:text="@string/menu"
             android:textStyle="bold"
-            android:textSize="22sp"
-            android:layout_gravity="center_horizontal"
+            android:textSize="24sp"
+            android:textColor="@color/black"
             android:paddingBottom="16dp"/>
 
         <TextView

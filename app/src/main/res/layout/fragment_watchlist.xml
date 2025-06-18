@@ -6,9 +6,19 @@
     tools:context=".Watchlist"
     android:padding="16dp">
 
+    <androidx.appcompat.widget.AppCompatTextView
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:text="@string/watchlist"
+        android:textColor="@color/black"
+        android:textStyle="bold"
+        android:textSize="24sp"
+        android:id="@+id/txtWatchlist"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/recyclerStockList"/>
+        android:id="@+id/recyclerStockList"
+        android:layout_below="@id/txtWatchlist"/>
 
 </RelativeLayout>
