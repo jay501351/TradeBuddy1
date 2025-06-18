@@ -58,7 +58,8 @@ class NewsAdapter(private var items: List<NewsItem>) : RecyclerView.Adapter<News
         Log.d("NewsAdapter", "Image URL: ${news.image_url}")
 
         holder.itemView.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(news.link))
+            val intent = Intent(holder.itemView.context,NewsWebViewActivity::class.java)
+            intent.putExtra("url",news.link)
             holder.itemView.context.startActivity(intent)
         }
     }
