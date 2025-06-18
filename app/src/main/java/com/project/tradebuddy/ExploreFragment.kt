@@ -1,6 +1,6 @@
 package com.project.tradebuddy
 
-import NewsViewModel
+import com.project.tradebuddy.viewmodel.NewsViewModel
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater

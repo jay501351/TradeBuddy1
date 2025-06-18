@@ -1,4 +1,9 @@
-import androidx.lifecycle.*
+package com.project.tradebuddy.viewmodel
+
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.project.tradebuddy.NewsItem
 import com.project.tradebuddy.RetrofitClient
 import kotlinx.coroutines.launch
