@@ -24,8 +24,6 @@ class Watchlist : Fragment() {
 
         val stocks = listOf(
             StockItem(R.color.black, "AAPL", "Apple Inc.", "$120", "(+1.5%)", true),
-            StockItem(R.color.black, "GOOGL", "Alphabet Inc.", "$2,560", "(+0.9%)", false),
-            StockItem(R.color.black, "AMZN", "Amazon.com Inc.", "$3,270", "(-0.3%)", true)
         )
 
         adapter = StockAdapter(stocks)
