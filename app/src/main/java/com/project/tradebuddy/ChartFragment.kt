@@ -18,7 +18,7 @@ class ChartFragment : Fragment() {
     private lateinit var webView: WebView
     private lateinit var spinner: Spinner
 
-    // Use free symbols like AAPL, TSLA, AMZN (NASDAQ)
+    // Default stock symbols (for dropdown)
     private val stockSymbols = mapOf(
         "Apple (AAPL)" to "NASDAQ:AAPL",
         "Tesla (TSLA)" to "NASDAQ:TSLA",
@@ -27,6 +27,8 @@ class ChartFragment : Fragment() {
         "Google (GOOG)" to "NASDAQ:GOOG"
     )
 
+    private var selectedSymbol: String? = null
+
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,15 +36,24 @@ class ChartFragment : Fragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_chart, container, false)
 
-        // Init views
+        // Initialize views
         webView = view.findViewById(R.id.chartWebView)
         spinner = view.findViewById(R.id.stockSpinner)
+
+        // 🔹 Retrieve symbol if passed from WatchlistFragment
+        selectedSymbol = arguments?.getString("symbol")
 
         setupWebView()
         setupSpinner()
 
-        // Load default stock
-        loadTradingViewChart(stockSymbols.values.first())
+        // 🔹 Load passed stock or default
+        val symbolToLoad = selectedSymbol ?: stockSymbols.values.first()
+        loadTradingViewChart(symbolToLoad)
+
+        // 🔹 Hide spinner if chart opened from Watchlist
+        if (selectedSymbol != null) {
+            spinner.visibility = View.GONE
+        }
 
         return view
     }
@@ -70,8 +81,8 @@ class ChartFragment : Fragment() {
             override fun onItemSelected(
                 parent: AdapterView<*>?, view: View?, position: Int, id: Long
             ) {
-                val selectedSymbol = stockSymbols.values.toList()[position]
-                loadTradingViewChart(selectedSymbol)
+                val selected = stockSymbols.values.toList()[position]
+                loadTradingViewChart(selected)
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}

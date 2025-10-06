@@ -8,10 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.project.tradebuddy.ui.watchlist.WatchlistFragment
 
 class HomeActivity : AppCompatActivity() {
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: StockAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,10 +19,10 @@ class HomeActivity : AppCompatActivity() {
         
         // BottomNavigationView setup
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
-        loadFragment(Watchlist())
+        loadFragment(WatchlistFragment())
         bottomNav.setOnItemSelectedListener {
             when (it.itemId) {
-                R.id.nav_watchList -> loadFragment(Watchlist())
+                R.id.nav_watchList -> loadFragment(WatchlistFragment())
                 R.id.nav_chart -> loadFragment(ChartFragment())
                 R.id.nav_explore -> loadFragment(ExploreFragment())
                 R.id.nav_menu -> loadFragment(MenuFragment())

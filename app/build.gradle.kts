@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.project.tradebuddy"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.project.tradebuddy"

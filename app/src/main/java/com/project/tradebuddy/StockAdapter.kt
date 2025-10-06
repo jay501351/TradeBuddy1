@@ -1,43 +1,52 @@
-package com.project.tradebuddy
+package com.project.tradebuddy.ui.watchlist
 
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.project.tradebuddy.R
+import com.project.tradebuddy.Stock
 
-class StockAdapter(private val stockList: List<StockItem>) : RecyclerView.Adapter<StockAdapter.StockViewHolder>() {
-    override fun onCreateViewHolder(
-        parent: ViewGroup,
-        viewType: Int
-    ): StockViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_stock, parent, false)
+class WatchlistAdapter(
+    private val onItemClick: (Stock) -> Unit
+) : RecyclerView.Adapter<WatchlistAdapter.StockViewHolder>() {
+
+    private val stocks = mutableListOf<Stock>()
+
+    fun setStocks(list: List<Stock>) {
+        stocks.clear()
+        stocks.addAll(list)
+        notifyDataSetChanged()
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StockViewHolder {
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_watchlist, parent, false)
         return StockViewHolder(view)
     }
 
-    override fun onBindViewHolder(
-        holder: StockViewHolder,
-        position: Int
-    ) {
-        val item = stockList[position]
-        holder.imgLogo.setImageResource(item.logoResId)
-        holder.txtSymbol.text = item.symbol
-        holder.txtCompany.text = item.company
-        holder.txtPrice.text = item.price
-        holder.txtChange.text = item.change
-        holder.txtChange.setTextColor(
-            if (item.isPositive) Color.parseColor("#008000")else Color.parseColor("#FF0000"))
+    override fun onBindViewHolder(holder: StockViewHolder, position: Int) {
+        val stock = stocks[position]
+        holder.bind(stock)
+        holder.itemView.setOnClickListener { onItemClick(stock) }
     }
 
-    override fun getItemCount(): Int = stockList.size
+    override fun getItemCount(): Int = stocks.size
 
-    class StockViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
-        val imgLogo = itemView.findViewById<ImageView>(R.id.imgStockLogo)
-        val txtSymbol = itemView.findViewById<TextView>(R.id.txtStockSymbol)
-        val txtCompany = itemView.findViewById<TextView>(R.id.txtCompanyName)
-        val txtPrice = itemView.findViewById<TextView>(R.id.txtStockPrice)
-        val txtChange = itemView.findViewById<TextView>(R.id.txtStockChange)
+    class StockViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val name: TextView = itemView.findViewById(R.id.stockName)
+        private val symbol: TextView = itemView.findViewById(R.id.stockSymbol)
+        private val price: TextView = itemView.findViewById(R.id.stockPrice)
+        private val change: TextView = itemView.findViewById(R.id.stockChange)
+
+        fun bind(stock: Stock) {
+            name.text = stock.name
+            symbol.text = stock.symbol
+            price.text = "₹${stock.price}"
+            val changeText = "${if (stock.change >= 0) "+" else ""}${stock.change} (${stock.changePercent}%)"
+            change.text = changeText
+            change.setTextColor(if (stock.change >= 0) Color.parseColor("#2E7D32") else Color.parseColor("#C62828"))
+        }
     }
 }
