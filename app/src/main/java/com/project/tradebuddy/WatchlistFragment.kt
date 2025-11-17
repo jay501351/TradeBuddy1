@@ -18,6 +18,7 @@ import com.project.tradebuddy.ChartFragment
 import com.project.tradebuddy.R
 import com.project.tradebuddy.StockSearchItem
 import com.project.tradebuddy.WatchlistManager
+import com.project.tradebuddy.WatchlistPickerAdapter
 import com.project.tradebuddy.ui.search.StockSearchFragment
 
 class WatchlistFragment : Fragment() {
@@ -30,7 +31,7 @@ class WatchlistFragment : Fragment() {
     private var btnAddList: MaterialButton? = null
     private var toolbar: MaterialToolbar? = null
 
-    private var watchlistNames: List<String> = emptyList()
+    private var watchlistNames: MutableList<String> = mutableListOf()
     private var currentListIndex = 0
 
     private val RECYCLER_ID = R.id.recyclerWatchlist
@@ -46,7 +47,7 @@ class WatchlistFragment : Fragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_watchlist, container, false)
 
-        // RecyclerView + adapter — note we now pass both click and long-click handlers
+        // RecyclerView + adapter — long-press removal included if your adapter supports it
         recyclerView = view.findViewById(RECYCLER_ID)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         adapter = WatchlistAdapter(
@@ -80,16 +81,9 @@ class WatchlistFragment : Fragment() {
             showCreateListDialog()
         }
 
+        // NEW: open custom picker dialog
         imgMenu?.setOnClickListener {
-            if (watchlistNames.size <= 1) {
-                Toast.makeText(requireContext(), "No multiple watchlists available", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            currentListIndex = (currentListIndex + 1) % watchlistNames.size
-            val newName = watchlistNames[currentListIndex]
-            tvCurrentList?.text = newName
-            loadWatchlistByName(newName)
-            Toast.makeText(requireContext(), "Switched to $newName", Toast.LENGTH_SHORT).show()
+            showWatchlistPickerDialogCustom()
         }
 
         loadAvailableWatchlists()
@@ -115,11 +109,12 @@ class WatchlistFragment : Fragment() {
     // --- helpers ---
 
     private fun loadAvailableWatchlists() {
-        watchlistNames = WatchlistManager.getAllWatchlistNames(requireContext())
+        val names = WatchlistManager.getAllWatchlistNames(requireContext())
+        watchlistNames = names.toMutableList()
         if (watchlistNames.isEmpty()) {
             // ensure at least "Default" exists
             WatchlistManager.createWatchlist(requireContext(), "Default")
-            watchlistNames = WatchlistManager.getAllWatchlistNames(requireContext())
+            watchlistNames = WatchlistManager.getAllWatchlistNames(requireContext()).toMutableList()
         }
         val cur = WatchlistManager.getCurrentWatchlistName(requireContext())
         currentListIndex = if (!cur.isNullOrEmpty()) watchlistNames.indexOf(cur).coerceAtLeast(0) else 0
@@ -188,6 +183,77 @@ class WatchlistFragment : Fragment() {
             }
             .setNegativeButton("Cancel", null)
             .show()
+    }
+
+    /**
+     * NEW: custom RecyclerView dialog for picking/deleting watchlists
+     */
+    private fun showWatchlistPickerDialogCustom() {
+        loadAvailableWatchlists()
+
+        val dlgView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_watchlist_picker, null)
+        val rv = dlgView.findViewById<RecyclerView>(R.id.recyclerDialogLists)
+        rv.layoutManager = LinearLayoutManager(requireContext())
+
+        val initialSelected = currentListIndex.coerceIn(0, watchlistNames.size - 1)
+
+        // make adapterDialog nullable so lambdas may reference it safely
+        var adapterDialog: WatchlistPickerAdapter? = null
+
+        adapterDialog = WatchlistPickerAdapter(
+            items = watchlistNames,
+            selectedIndex = initialSelected,
+            onItemClick = { index, name ->
+                // on row click: switch immediately
+                currentListIndex = index
+                WatchlistManager.setCurrentWatchlistName(requireContext(), name)
+                tvCurrentList?.text = name
+                loadWatchlistByName(name)
+            },
+            onDeleteClick = { index, name ->
+                // ask confirm, then delete
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Delete watchlist")
+                    .setMessage("Delete \"$name\"? This will remove all stocks in that list.")
+                    .setPositiveButton("Delete") { delDialog, _ ->
+                        try {
+                            // perform deletion
+                            WatchlistManager.deleteWatchlist(requireContext(), name)
+                            Toast.makeText(requireContext(), "\"$name\" deleted", Toast.LENGTH_SHORT).show()
+                            // refresh lists and update dialog adapter
+                            loadAvailableWatchlists()
+                            adapterDialog?.updateItems(watchlistNames)
+                            // adjust selection & displayed list
+                            val newCurrent = WatchlistManager.getCurrentWatchlistName(requireContext())
+                            if (!newCurrent.isNullOrEmpty()) {
+                                tvCurrentList?.text = newCurrent
+                                loadWatchlistByName(newCurrent)
+                            } else {
+                                // fallback: set first or Default
+                                val first = watchlistNames.firstOrNull() ?: "Default"
+                                WatchlistManager.setCurrentWatchlistName(requireContext(), first)
+                                tvCurrentList?.text = first
+                                loadWatchlistByName(first)
+                            }
+                        } catch (e: Exception) {
+                            Log.w("WatchlistFragment", "Failed to delete list: ${e.message}")
+                            Toast.makeText(requireContext(), "Failed to delete $name", Toast.LENGTH_SHORT).show()
+                        }
+                        delDialog.dismiss()
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
+            }
+        )
+
+        rv.adapter = adapterDialog
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dlgView)
+            .setNegativeButton("Close", null)
+            .create()
+
+        dialog.show()
     }
 
     private fun openChartFor(symbol: String?) {
