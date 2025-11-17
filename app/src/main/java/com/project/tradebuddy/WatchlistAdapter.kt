@@ -9,7 +9,8 @@ import com.project.tradebuddy.R
 import com.project.tradebuddy.StockSearchItem
 
 class WatchlistAdapter(
-    private val onItemClick: (StockSearchItem) -> Unit
+    private val onItemClick: (StockSearchItem) -> Unit,
+    private val onItemLongClick: ((StockSearchItem) -> Unit)? = null
 ) : RecyclerView.Adapter<WatchlistAdapter.StockViewHolder>() {
 
     private val stocks = mutableListOf<StockSearchItem>()
@@ -30,6 +31,11 @@ class WatchlistAdapter(
         val stock = stocks[position]
         holder.bind(stock)
         holder.itemView.setOnClickListener { onItemClick(stock) }
+
+        holder.itemView.setOnLongClickListener {
+            onItemLongClick?.invoke(stock)
+            true
+        }
     }
 
     override fun getItemCount(): Int = stocks.size
@@ -38,11 +44,9 @@ class WatchlistAdapter(
         private val name: TextView = itemView.findViewById(R.id.stockName)
         private val symbol: TextView = itemView.findViewById(R.id.stockSymbol)
 
-
         fun bind(stock: StockSearchItem) {
             name.text = stock.instrument_name
             symbol.text = stock.symbol
-
         }
     }
 }

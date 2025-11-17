@@ -46,12 +46,17 @@ class WatchlistFragment : Fragment() {
     ): View {
         val view = inflater.inflate(R.layout.fragment_watchlist, container, false)
 
-        // RecyclerView + adapter
+        // RecyclerView + adapter — note we now pass both click and long-click handlers
         recyclerView = view.findViewById(RECYCLER_ID)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        adapter = WatchlistAdapter { stockItem ->
-            openChartFor(stockItem.symbol)
-        }
+        adapter = WatchlistAdapter(
+            onItemClick = { stockItem ->
+                openChartFor(stockItem.symbol)
+            },
+            onItemLongClick = { stockItem ->
+                confirmAndRemoveStock(stockItem)
+            }
+        )
         recyclerView.adapter = adapter
 
         // header views
@@ -60,7 +65,7 @@ class WatchlistFragment : Fragment() {
         btnAddList = view.findViewById(BTN_ADD_LIST_ID)
         toolbar = view.findViewById(TOOLBAR_ID)
 
-        // toolbar menu click (ensure your res/menu/watchlist_menu has a search action id if you want this)
+        // toolbar menu click -> open stock search on action_add_stock
         toolbar?.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.action_add_stock -> {
@@ -157,6 +162,27 @@ class WatchlistFragment : Fragment() {
                     } else {
                         Toast.makeText(requireContext(), "List with that name already exists", Toast.LENGTH_SHORT).show()
                     }
+                }
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    private fun confirmAndRemoveStock(stock: StockSearchItem) {
+        val currentName = WatchlistManager.getCurrentWatchlistName(requireContext()) ?: "Default"
+        AlertDialog.Builder(requireContext())
+            .setTitle("Remove stock")
+            .setMessage("Remove ${stock.symbol} from \"$currentName\"?")
+            .setPositiveButton("Remove") { dialog, _ ->
+                try {
+                    WatchlistManager.removeStockFromList(requireContext(), currentName, stock.symbol)
+                    // refresh shown list
+                    loadWatchlistByName(currentName)
+                    Toast.makeText(requireContext(), "${stock.symbol} removed", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    Log.w("WatchlistFragment", "Failed to remove stock: ${e.message}")
+                    Toast.makeText(requireContext(), "Failed to remove ${stock.symbol}", Toast.LENGTH_SHORT).show()
                 }
                 dialog.dismiss()
             }
