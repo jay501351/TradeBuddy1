@@ -1,0 +1,48 @@
+package com.project.tradebuddy.ui.watchlist
+
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
+import com.project.tradebuddy.R
+import com.project.tradebuddy.StockSearchItem
+
+class WatchlistAdapter(
+    private val onItemClick: (StockSearchItem) -> Unit
+) : RecyclerView.Adapter<WatchlistAdapter.StockViewHolder>() {
+
+    private val stocks = mutableListOf<StockSearchItem>()
+
+    fun setStocks(list: List<StockSearchItem>) {
+        stocks.clear()
+        stocks.addAll(list)
+        notifyDataSetChanged()
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StockViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_watchlist, parent, false)
+        return StockViewHolder(view)
+    }
+
+    override fun onBindViewHolder(holder: StockViewHolder, position: Int) {
+        val stock = stocks[position]
+        holder.bind(stock)
+        holder.itemView.setOnClickListener { onItemClick(stock) }
+    }
+
+    override fun getItemCount(): Int = stocks.size
+
+    class StockViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val name: TextView = itemView.findViewById(R.id.stockName)
+        private val symbol: TextView = itemView.findViewById(R.id.stockSymbol)
+
+
+        fun bind(stock: StockSearchItem) {
+            name.text = stock.instrument_name
+            symbol.text = stock.symbol
+
+        }
+    }
+}

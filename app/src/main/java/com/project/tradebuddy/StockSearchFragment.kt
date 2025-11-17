@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -28,7 +29,7 @@ class StockSearchFragment : Fragment() {
     private lateinit var api: TwelveDataService
     private var searchJob: Job? = null
 
-    private val apiKey = "YOUR_TWELVE_DATA_API_KEY"
+    private val apiKey = "6ef0d621d2f242feabb69587a0b578cf"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -40,10 +41,18 @@ class StockSearchFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerSearch)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
+        // <-- Updated handler: add to CURRENT watchlist via WatchlistManager.addStockToList(...)
         adapter = StockSearchAdapter { selectedStock ->
-            WatchlistManager.addStock(requireContext(), selectedStock)
+            val currentName = WatchlistManager.getCurrentWatchlistName(requireContext()) ?: "Default"
+            val added = WatchlistManager.addStockToList(requireContext(), currentName, selectedStock)
+            if (added) {
+                Toast.makeText(requireContext(), "Added ${selectedStock.symbol} to $currentName", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "${selectedStock.symbol} already in $currentName", Toast.LENGTH_SHORT).show()
+            }
             parentFragmentManager.popBackStack() // Go back to watchlist
         }
+
         recyclerView.adapter = adapter
 
         setupRetrofit()
