@@ -8,3 +8,8 @@ data class StockItem(
     val change: String,
     val isPositive: Boolean
 )
+
+data class Watchlist(
+    val name: String,
+    val stocks: MutableList<Stock> = mutableListOf()
+)

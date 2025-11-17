@@ -5,11 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.ProgressBar
 import android.widget.Spinner
 import androidx.fragment.app.Fragment
 
@@ -17,6 +19,7 @@ class ChartFragment : Fragment() {
 
     private lateinit var webView: WebView
     private lateinit var spinner: Spinner
+    private lateinit var progressBar: ProgressBar
 
     // Default stock symbols (for dropdown)
     private val stockSymbols = mapOf(
@@ -39,27 +42,31 @@ class ChartFragment : Fragment() {
         // Initialize views
         webView = view.findViewById(R.id.chartWebView)
         spinner = view.findViewById(R.id.stockSpinner)
+        progressBar = view.findViewById(R.id.chartLoadingProgress)
 
-        // 🔹 Retrieve symbol if passed from WatchlistFragment
+        // Retrieve symbol if passed from WatchlistFragment
         selectedSymbol = arguments?.getString("symbol")
 
         setupWebView()
         setupSpinner()
 
-        // 🔹 Load passed stock or default
         val symbolToLoad = selectedSymbol ?: stockSymbols.values.first()
         loadTradingViewChart(symbolToLoad)
 
-        // 🔹 Hide spinner if chart opened from Watchlist
-        if (selectedSymbol != null) {
-            spinner.visibility = View.GONE
-        }
+        if (selectedSymbol != null) spinner.visibility = View.GONE
 
         return view
     }
 
     private fun setupWebView() {
-        webView.webViewClient = WebViewClient()
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                progressBar.visibility = View.GONE
+            }
+        }
+
+        webView.webChromeClient = WebChromeClient()
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -90,6 +97,7 @@ class ChartFragment : Fragment() {
     }
 
     private fun loadTradingViewChart(symbol: String) {
+        progressBar.visibility = View.VISIBLE // show loader before loading
         val html = """
             <html>
               <head>

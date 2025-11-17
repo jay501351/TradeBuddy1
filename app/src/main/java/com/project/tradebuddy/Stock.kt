@@ -6,5 +6,4 @@ data class Stock(
     val price: Double,
     val change: Double,
     val changePercent: Double
-
 )

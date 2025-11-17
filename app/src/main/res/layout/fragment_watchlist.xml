@@ -14,8 +14,59 @@
         app:titleTextColor="@color/black"
         app:menu="@menu/watchlist_menu" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/headerRow"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="12dp"
+        android:gravity="center_vertical"
+        android:background="@android:color/white"
+        android:elevation="2dp">
+        
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:id="@+id/btnMenu"
+            android:src="@drawable/hamburger"
+            android:contentDescription="@string/menu" />
+
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvCurrentList"
+            android:text="@string/watchlist"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/black"/>
+
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"/>
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnAddList"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+ Add List"
+            android:textSize="14sp"
+            android:textColor="@color/black"
+            app:cornerRadius="12dp"
+            app:strokeColor="@color/black"
+            app:iconTint="@color/black"
+            app:strokeWidth="1dp"
+            android:textAllCaps="false"/>
+    </LinearLayout>
+
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/watchlistRecyclerView"
+        android:id="@+id/recyclerWatchlist"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="8dp"/>

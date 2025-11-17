@@ -19,4 +19,12 @@
         android:id="@+id/chartWebView"
         android:layout_weight="1"/>
 
+    <ProgressBar
+        android:id="@+id/chartLoadingProgress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
 </LinearLayout>
