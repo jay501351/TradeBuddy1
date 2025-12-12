@@ -3,40 +3,67 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileFragment"
     android:orientation="vertical"
+    android:padding="24dp"
     android:fitsSystemWindows="true"
-    android:padding="24dp">
-    
+    tools:context=".ProfileFragment">
+
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/profile"
+        android:text="Profile"
         android:textSize="24sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"/>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="16dp"/>
+        android:layout_height="16dp" />
 
-    <TextView
+    <!-- Name Row with Edit Icon -->
+    <LinearLayout
+        android:id="@+id/layoutNameRow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:id="@+id/txtProfileName"/>
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/txtProfileName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btnEditProfile"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_edit"
+            android:contentDescription="Edit Profile"/>
+
+    </LinearLayout>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="16dp"/>
+        android:layout_height="16dp" />
 
     <TextView
+        android:id="@+id/txtEmailLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Email"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:textStyle="bold"
-        android:id="@+id/txtProfileEmail"/>
+        android:paddingTop="8dp" />
+
+    <TextView
+        android:id="@+id/txtProfileEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:padding="4dp" />
 
 </LinearLayout>

@@ -23,6 +23,7 @@
         app:itemTextColor="@color/nav_selector"
         app:menu="@menu/bottom_nav_menu"
         app:labelVisibilityMode="labeled"
-        android:layout_alignParentBottom="true"/>
+        android:layout_alignParentBottom="true"
+        android:outlineSpotShadowColor="@android:color/holo_blue_dark"/>
 
 </RelativeLayout>

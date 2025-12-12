@@ -1,9 +1,9 @@
 package com.project.tradebuddy
 
 data class StockSearchItem(
-    val symbol: String,
-    val instrument_name: String,
-    val exchange: String,
-    val country: String,
-    val currency: String
+    var symbol: String = "",
+    var instrument_name: String = "",
+    var exchange: String = "",
+    var country: String = "",
+    var currency: String = ""
 )

@@ -23,6 +23,6 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/bin"
+        android:src="@drawable/ic_delete"
         android:contentDescription="@string/delete" />
 </LinearLayout>

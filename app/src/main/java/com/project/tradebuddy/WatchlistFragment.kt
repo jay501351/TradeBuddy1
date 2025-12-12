@@ -1,5 +1,9 @@
 package com.project.tradebuddy.ui.watchlist
 
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,8 +15,10 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
@@ -105,6 +111,9 @@ class WatchlistFragment : Fragment() {
         )
         recyclerView.adapter = adapter
 
+        // setup swipe-to-delete (with Undo)
+        setupSwipeToDelete()
+
         // header views
         imgMenu = view.findViewById(IMG_MENU_ID)
         tvCurrentList = view.findViewById(TV_LIST_ID)
@@ -156,6 +165,114 @@ class WatchlistFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         stopPricePolling()
+    }
+
+    // --- swipe setup ---
+    private fun setupSwipeToDelete() {
+        // visuals
+        val deleteDrawable: Drawable? = ContextCompat.getDrawable(requireContext(), R.drawable.ic_delete)
+        val background = ColorDrawable()
+        // use a built in red color to avoid missing resource
+        val backgroundColor = ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark)
+        val clearPaint = Paint()
+
+        val callback = object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean = false
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                // use adapterPosition (more broadly available than absoluteAdapterPosition)
+                val pos = viewHolder.adapterPosition
+                if (pos == RecyclerView.NO_POSITION) return
+
+                // remove from adapter and keep a copy for undo
+                val removedItem = adapter.removeAt(pos) ?: run {
+                    adapter.notifyDataSetChanged()
+                    return
+                }
+
+                // remove from persistent storage immediately (you already do this elsewhere; keep consistent)
+                val currentName = WatchlistManager.getCurrentWatchlistName(requireContext()) ?: "Default"
+                try {
+                    WatchlistManager.removeStockFromList(requireContext(), currentName, removedItem.symbol)
+                } catch (e: Exception) {
+                    Log.w("WatchlistFragment", "Failed removing from storage: ${e.message}")
+                }
+
+                // show UNDO snackbar with 10s auto-dismiss
+                val parentView = requireActivity().findViewById<View>(android.R.id.content)
+                val snackbar = Snackbar.make(parentView, "${removedItem.symbol} removed", Snackbar.LENGTH_INDEFINITE)
+                    .setAction("Undo") {
+                        // restore in-memory list and persistent storage
+                        val insertPos = pos.coerceIn(0, adapter.itemCount)
+                        adapter.addAt(insertPos, removedItem)
+                        try {
+                            WatchlistManager.addStockToList(requireContext(), currentName, removedItem)
+                        } catch (e: Exception) {
+                            Log.w("WatchlistFragment", "Failed re-adding to storage on undo: ${e.message}")
+                        }
+                        recyclerView.scrollToPosition(insertPos)
+                    }
+
+                snackbar.show()
+                // auto-dismiss after 10 seconds
+                mainHandler.postDelayed({ snackbar.dismiss() }, 10_000L)
+            }
+
+            override fun onChildDraw(
+                c: Canvas,
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                dX: Float,
+                dY: Float,
+                actionState: Int,
+                isCurrentlyActive: Boolean
+            ) {
+                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive)
+
+                val itemView = viewHolder.itemView
+                val itemHeight = itemView.bottom - itemView.top
+
+                // draw red background depending on swipe direction
+                background.color = backgroundColor
+                if (dX > 0) {
+                    background.setBounds(itemView.left, itemView.top, itemView.left + dX.toInt(), itemView.bottom)
+                } else if (dX < 0) {
+                    background.setBounds(itemView.right + dX.toInt(), itemView.top, itemView.right, itemView.bottom)
+                } else {
+                    background.setBounds(0, 0, 0, 0)
+                }
+                background.draw(c)
+
+                // draw delete icon centered vertically
+                deleteDrawable?.let { icon ->
+                    val iconMargin = (itemHeight - icon.intrinsicHeight) / 2
+                    val iconTop = itemView.top + iconMargin
+                    val iconBottom = iconTop + icon.intrinsicHeight
+
+                    if (dX > 0) {
+                        // left side
+                        val iconLeft = itemView.left + iconMargin
+                        val iconRight = iconLeft + icon.intrinsicWidth
+                        icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
+                    } else if (dX < 0) {
+                        // right side
+                        val iconRight = itemView.right - iconMargin
+                        val iconLeft = iconRight - icon.intrinsicWidth
+                        icon.setBounds(iconLeft, iconTop, iconRight, iconBottom)
+                    } else {
+                        icon.setBounds(0, 0, 0, 0)
+                    }
+                    icon.draw(c)
+                }
+            }
+        }
+
+        val itemTouchHelper = ItemTouchHelper(callback)
+        itemTouchHelper.attachToRecyclerView(recyclerView)
     }
 
     // --- helpers ---

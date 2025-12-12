@@ -9,16 +9,25 @@ import com.project.tradebuddy.R
 import com.project.tradebuddy.StockSearchItem
 import java.text.DecimalFormat
 
+/**
+ * Adapter for the Watchlist RecyclerView.
+ *
+ * - Exposes helper methods removeAt/addAt/getItem/indexOfSymbol for swipe/undo and fragment operations.
+ * - Keeps a local priceMap to allow partial updates via updatePrices().
+ */
 class WatchlistAdapter(
     private val onItemClick: (StockSearchItem) -> Unit,
     private val onItemLongClick: ((StockSearchItem) -> Unit)? = null
 ) : RecyclerView.Adapter<WatchlistAdapter.StockViewHolder>() {
 
-    internal val stocks = mutableListOf<StockSearchItem>() // internal to allow fragment to read if needed
+    internal val stocks = mutableListOf<StockSearchItem>() // internal so fragment can inspect if needed
     private val priceMap = mutableMapOf<String, Pair<Double, Double?>>() // symbol -> (price, percent)
 
     private val df = DecimalFormat("#,##0.00")
 
+    /**
+     * Replace the current list of stocks with [list].
+     */
     fun setStocks(list: List<StockSearchItem>) {
         stocks.clear()
         stocks.addAll(list)
@@ -28,19 +37,80 @@ class WatchlistAdapter(
     }
 
     /**
-     * Update prices map and refresh the visible list.
+     * Safe getter for an item at [position].
+     */
+    fun getItem(position: Int): StockSearchItem? = stocks.getOrNull(position)
+
+    /**
+     * Insert [item] at [position] (or append if position out of range).
+     */
+    fun addAt(position: Int, item: StockSearchItem) {
+        val pos = position.coerceIn(0, stocks.size)
+        stocks.add(pos, item)
+        notifyItemInserted(pos)
+    }
+
+    /**
+     * Remove item at [position] and return it, or null if position invalid.
+     * Also clears cached price for that symbol.
+     */
+    fun removeAt(position: Int): StockSearchItem? {
+        if (position < 0 || position >= stocks.size) return null
+        val removed = stocks.removeAt(position)
+        notifyItemRemoved(position)
+        removed.symbol?.let { priceMap.remove(it) }
+        return removed
+    }
+
+    /**
+     * Return first index of [symbol] (case-insensitive) or -1 if not found.
+     */
+    fun indexOfSymbol(symbol: String?): Int {
+        if (symbol == null) return -1
+        return stocks.indexOfFirst { it.symbol?.equals(symbol, ignoreCase = true) == true }
+    }
+
+    /**
+     * Comma-separated symbols suitable for API requests.
+     */
+    fun getSymbolsCsv(): String {
+        return stocks.mapNotNull { it.symbol?.trim() }.filter { it.isNotEmpty() }.joinToString(",")
+    }
+
+    /**
+     * Update the internal price map with [symbolToPrice] and notify only changed item positions.
      * symbolToPrice: Map<symbol, Pair(price, percent?)>
      */
     fun updatePrices(symbolToPrice: Map<String, Pair<Double, Double?>>) {
-        for ((sym, pair) in symbolToPrice) {
-            priceMap[sym] = pair
-        }
-        // Simple approach: refresh all. For better perf, update visible positions only.
-        notifyDataSetChanged()
-    }
+        if (symbolToPrice.isEmpty()) return
 
-    fun getSymbolsCsv(): String {
-        return stocks.mapNotNull { it.symbol?.trim() }.filter { it.isNotEmpty() }.joinToString(",")
+        val positionsToNotify = mutableSetOf<Int>()
+
+        for ((symRaw, pair) in symbolToPrice) {
+            val sym = symRaw
+            val old = priceMap[sym]
+            // only update if price changed (or not present)
+            val oldPrice = old?.first
+            val newPrice = pair.first
+            val oldPct = old?.second
+            val newPct = pair.second
+
+            val priceChanged = oldPrice == null || oldPrice != newPrice
+            val pctChanged = (oldPct ?: Double.NaN) != (newPct ?: Double.NaN)
+
+            if (priceChanged || pctChanged) {
+                priceMap[sym] = pair
+                // find all positions with this symbol (usually one)
+                stocks.forEachIndexed { idx, s ->
+                    if (s.symbol?.equals(sym, ignoreCase = true) == true) positionsToNotify.add(idx)
+                }
+            }
+        }
+
+        // notify changed positions (only visible ones will redraw)
+        positionsToNotify.forEach { pos ->
+            if (pos in 0 until itemCount) notifyItemChanged(pos)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StockViewHolder {
@@ -91,7 +161,7 @@ class WatchlistAdapter(
             } else {
                 val sign = if (percent >= 0) "+" else ""
                 changeTv?.text = String.format("%s%.2f%%", sign, percent)
-                // color green/red
+                // color green/red (try-catch for older APIs)
                 try {
                     val color = if (percent >= 0)
                         itemView.context.getColor(android.R.color.holo_green_dark)
@@ -99,7 +169,7 @@ class WatchlistAdapter(
                         itemView.context.getColor(android.R.color.holo_red_dark)
                     changeTv?.setTextColor(color)
                 } catch (e: Exception) {
-                    // fallback: ignore
+                    // ignore color fallback
                 }
             }
         }
